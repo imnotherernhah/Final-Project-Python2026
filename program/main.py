@@ -1,4 +1,5 @@
 import pygame
+import io
 import customtkinter as tk
 from customtkinter import CTkImage
 from PIL import Image
@@ -17,24 +18,22 @@ from tinytag import TinyTag
 file_path = "R1B.ogg"
 filename = Path(file_path).stem
 print(filename)
-tag = TinyTag.get('R1B.ogg')
+tag = TinyTag.get('R1B.ogg', image=True)
 songtit=tag.title
 songartist=tag.artist
 album=tag.album
-#img=tag.get_image()
-#if img:
-    #with open('cover_art.jpg', 'wb') as f:
-        #f.write(img)
+img=tag.images.front_cover
+imgdat=img.data
+img2 = Image.open(io.BytesIO(imgdat))
+img2.save('cover.png')
 songname = tk.CTkLabel(root, text=songtit, font=("Arial", 22))
-songname.place(relx=0.5, rely=0.1, anchor='c')
+songname.place(relx=0.5, rely=0.03, anchor='c')
 songart = tk.CTkLabel(root, text=songartist, font=("Arial", 15))
-songart.place(relx=0.5, rely=0.15, anchor='c')
-songal = tk.CTkLabel(root, text=album, font=("Arial", 15))
-songal.place(relx=0.5, rely=0.2, anchor='c')
-#my_image = tk.CTkImage(light_image=img,
-                         #dark_image=img,
-                         #size=(30, 30))
-#button = tk.CTkButton(root, text="Click Me", image=my_image)
-#button.pack(pady=20, padx=20)
+songart.place(relx=0.5, rely=0.08, anchor='c')
+songal = tk.CTkLabel(root, text=album, font=("Arial", 20))
+songal.place(relx=0.5, rely=0.12, anchor='c')
+cover = tk.CTkImage(light_image=Image.open("cover.png"), dark_image=Image.open("cover.png"),size=(300,300))
+label = tk.CTkLabel(root, image=cover, text="")  # text="" hides text
+label.place(relx=0.5, rely=0.46, anchor='c')
 root.mainloop()
 time.sleep(50)
