@@ -2,7 +2,7 @@ import math
 import pygame
 import io
 import customtkinter as tk
-from customtkinter import CTkImage
+from customtkinter import CTkImage, CTkCanvas
 from tkinter import filedialog
 from PIL import Image
 import time
@@ -15,6 +15,39 @@ root.geometry("500x500")
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 pygame.init()
+pathtosng=""
+name=""
+State=0
+
+def OpenFile():
+    global pathtosng
+    pathtosng = filedialog.askopenfilename(
+        initialdir="/",
+        title="Choose an audio file to play.",
+        filetypes=(("Supported audio files (.ogg, .wav, .mp3, .flac)", "*.ogg; *.wav; *.mp3; *.flac"),
+                   ("All files", "*.*"))
+    )
+    global name
+    pat = Path(pathtosng)
+    name = pat.name
+    mus = pygame.mixer.music.load(pathtosng)
+    pygame.mixer.music.play()
+    MainProg()
+
+def ClrSong():
+    songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
+    songname.place(relx=0.5, rely=0.665, anchor='c')
+    songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
+    songart.place(relx=0.5, rely=0.715, anchor='c')
+    songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
+    songal.place(relx=0.5, rely=0.76, anchor='c')
+    cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
+    label = tk.CTkLabel(root, image=cover, text="")
+    label.place(relx=0.5, rely=0.34, anchor='c')
+    button = tk.CTkButton(root, text="", width=30)
+    button.place(relx=0.5, rely=0.85, anchor='c')
+    button2 = tk.CTkButton(root, text="📁", width=30)
+    button2.place(relx=0.4, rely=0.85, anchor='c')
 def updProgBar(progbar,tag, elapsed, tota):
     tottime=tag.duration
     #print(round(tottime/60,2))
@@ -23,6 +56,25 @@ def updProgBar(progbar,tag, elapsed, tota):
     elapsed.configure(text=timedelta(seconds=math.trunc(secs)))
     tota.configure(text=timedelta(seconds=math.trunc(tottime)))
     root.update()
+def Pause():
+    pygame.mixer.music.pause()
+    global State
+    State=1
+    global button
+    DisplayGUIButton(button)
+
+def Play():
+    pygame.mixer.music.unpause()
+    global State
+    State=0
+    global button
+    DisplayGUIButton(button)
+
+def DisplayGUIButton(button):
+    if State==0:
+        button.configure(text="⏸", command=Pause)
+    if State==1:
+        button.configure(text="▶︎", command=Play)
 
 def MainProg2():
     tag = TinyTag.get(pathtosng, image=True)
@@ -38,12 +90,9 @@ def MainProg2():
         album="Unknown Album"
     else:
         album=tag.album
-    songname = tk.CTkLabel(root, text=songtit, font=("Arial", 20))
-    songname.place(relx=0.5, rely=0.665, anchor='c')
-    songart = tk.CTkLabel(root, text=songartist, font=("Arial", 15))
-    songart.place(relx=0.5, rely=0.715, anchor='c')
-    songal = tk.CTkLabel(root, text=album, font=("Arial", 17))
-    songal.place(relx=0.5, rely=0.76, anchor='c')
+    songname.configure(text=songtit)
+    songart.configure(text=songartist)
+    songal.configure(text=album)
     cover = tk.CTkImage(light_image=Image.open("cover.png"), dark_image=Image.open("cover.png"), size=(300, 300))
     label = tk.CTkLabel(root, image=cover, text="")
     label.place(relx=0.5, rely=0.34, anchor='c')
@@ -53,10 +102,16 @@ def MainProg2():
     elap.place(relx=0.17, rely=0.81, anchor='w')
     tot = tk.CTkLabel(root, text="", font=("Arial", 17))
     tot.place(relx=0.71, rely=0.81, anchor='w')
+    button2.configure(command=OpenFile)
+    global button
+    DisplayGUIButton(button)
     while True:
         updProgBar(progressbar, tag, elap,tot)
 
 def MainProg():
+    root.update()
+    if pathtosng == "":
+        OpenFile()
     file_path = pathtosng
     filename = Path(file_path).stem
     print(filename)
@@ -73,16 +128,19 @@ def MainProg():
         img2 = Image.open(io.BytesIO(imgdat))
         img2.save('cover.png')
     MainProg2()
-pathtosng = filedialog.askopenfilename(
-    initialdir="/",
-    title="Choose an audio file to play.",
-    filetypes=(("Supported audio files (.ogg, .wav, .mp3, .flac)", "*.ogg; *.wav; *.mp3; *.flac"), ("All files", "*.*"))
-)
-pat=Path(pathtosng)
-name=pat.name
-
-print(f"Selected file: {pathtosng}")
-mus=pygame.mixer.music.load(pathtosng)
-pygame.mixer.music.play()
+songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
+songname.place(relx=0.5, rely=0.665, anchor='c')
+songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
+songart.place(relx=0.5, rely=0.715, anchor='c')
+songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
+songal.place(relx=0.5, rely=0.76, anchor='c')
+cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
+label = tk.CTkLabel(root, image=cover, text="")
+label.place(relx=0.5, rely=0.34, anchor='c')
+button = tk.CTkButton(root, text="⏸", width=30)
+button.place(relx=0.5, rely=0.85, anchor='c')
+button2 = tk.CTkButton(root, text="📁", width=30)
+button2.place(relx=0.4, rely=0.85, anchor='c')
+#print(f"Selected file: {pathtosng}")
 MainProg()
 #root.mainloop()
