@@ -2,7 +2,7 @@ import math
 import pygame
 import io
 import customtkinter as tk
-from customtkinter import CTkImage, CTkCanvas
+from customtkinter import CTkImage, CTkCanvas, CTkSlider
 from tkinter import filedialog
 from PIL import Image
 import time
@@ -33,7 +33,14 @@ def OpenFile():
     mus = pygame.mixer.music.load(pathtosng)
     pygame.mixer.music.play()
     MainProg()
-
+def OpenFile2():
+    global pathtosng
+    pathtosng = filedialog.askdirectory()
+    pat = Path(pathtosng)
+    name = pat.name
+    mus = pygame.mixer.music.load(pathtosng)
+    pygame.mixer.music.play()
+    #MainProgAlb()
 def ClrSong():
     songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
     songname.place(relx=0.5, rely=0.665, anchor='c')
@@ -75,9 +82,11 @@ def DisplayGUIButton(button):
         button.configure(text="⏸", command=Pause)
     if State==1:
         button.configure(text="▶︎", command=Play)
-
+taglen=0
 def MainProg2():
     tag = TinyTag.get(pathtosng, image=True)
+    global taglen
+    taglen=tag.duration
     if tag.title is None:
         songtit=name
     else:
@@ -103,6 +112,7 @@ def MainProg2():
     tot = tk.CTkLabel(root, text="", font=("Arial", 17))
     tot.place(relx=0.71, rely=0.81, anchor='w')
     button2.configure(command=OpenFile)
+    button3.configure(command=OpenFile2)
     global button
     DisplayGUIButton(button)
     while True:
@@ -128,6 +138,10 @@ def MainProg():
         img2 = Image.open(io.BytesIO(imgdat))
         img2.save('cover.png')
     MainProg2()
+
+def ChangeVol(val):
+    pygame.mixer_music.set_volume(val/100)
+
 songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
 songname.place(relx=0.5, rely=0.665, anchor='c')
 songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
@@ -141,6 +155,9 @@ button = tk.CTkButton(root, text="⏸", width=30)
 button.place(relx=0.5, rely=0.85, anchor='c')
 button2 = tk.CTkButton(root, text="📁", width=30)
 button2.place(relx=0.4, rely=0.85, anchor='c')
-#print(f"Selected file: {pathtosng}")
+button3 = tk.CTkButton(root, text="💿", width=30)
+button3.place(relx=0.6, rely=0.85, anchor='c')
+slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
+slider.place(relx=0.1, rely=0.5, anchor='e')
 MainProg()
 #root.mainloop()
