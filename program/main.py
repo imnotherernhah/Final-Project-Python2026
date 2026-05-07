@@ -9,6 +9,8 @@ import time
 from pathlib import Path
 from tinytag import TinyTag
 from datetime import timedelta
+import os
+
 root = tk.CTk()
 root.title("Music Player")
 root.geometry("500x500")
@@ -16,13 +18,21 @@ pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 pygame.init()
 pathtosng=""
+pathtoqsng=""
 name=""
 State=0
+inQueue=0
+
+def ChkSongOver():
+    for event in pygame.event.get():
+        if event.type == isEnd:
+            print("====END OF SONG====")
+            if inQueue==1:
+                MainProg()
 
 def OpenFile():
     global pathtosng
     pathtosng = filedialog.askopenfilename(
-        initialdir="/",
         title="Choose an audio file to play.",
         filetypes=(("Supported audio files (.ogg, .wav, .mp3, .flac)", "*.ogg; *.wav; *.mp3; *.flac"),
                    ("All files", "*.*"))
@@ -34,13 +44,26 @@ def OpenFile():
     pygame.mixer.music.play()
     MainProg()
 def OpenFile2():
-    global pathtosng
-    pathtosng = filedialog.askdirectory()
-    pat = Path(pathtosng)
+    global pathtoqsng
+    pathtoqsng = filedialog.askopenfilename(
+        title="Choose an audio file to add to the queue.",
+        filetypes=(("Supported audio files (.ogg, .wav, .mp3, .flac)", "*.ogg; *.wav; *.mp3; *.flac"),
+                   ("All files", "*.*"))
+    )
+    global name
+    pat = Path(pathtoqsng)
     name = pat.name
-    mus = pygame.mixer.music.load(pathtosng)
-    pygame.mixer.music.play()
-    #MainProgAlb()
+    #mus = pygame.mixer.music.load(pathtoqsng)
+    MainProgAlb()
+def MainProgAlb():
+    global pathtoqsng
+    global pathtosng
+    #pygame.mixer.music.queue(pathtoqsng)
+    pathtosng=pathtoqsng
+    global inQueue
+    pygame.mixer.music.queue(pathtoqsng)
+    inQueue=1
+
 def ClrSong():
     songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
     songname.place(relx=0.5, rely=0.665, anchor='c')
@@ -56,7 +79,9 @@ def ClrSong():
     button2 = tk.CTkButton(root, text="📁", width=30)
     button2.place(relx=0.4, rely=0.85, anchor='c')
 def updProgBar(progbar,tag, elapsed, tota):
-    tottime=tag.duration
+    global inQueue
+    global taglen
+    tottime=taglen
     #print(round(tottime/60,2))
     secs=(pygame.mixer_music.get_pos())/1000
     progbar.set(secs/tottime)
@@ -84,7 +109,12 @@ def DisplayGUIButton(button):
         button.configure(text="▶︎", command=Play)
 taglen=0
 def MainProg2():
-    tag = TinyTag.get(pathtosng, image=True)
+    global inQueue
+    if inQueue==0:
+        tag = TinyTag.get(pathtosng, image=True)
+    else:
+        tag = TinyTag.get(pathtoqsng, image=True)
+        inQueue = 0
     global taglen
     taglen=tag.duration
     if tag.title is None:
@@ -115,32 +145,38 @@ def MainProg2():
     button3.configure(command=OpenFile2)
     global button
     DisplayGUIButton(button)
+    slider.set(pygame.mixer.music.get_volume()*100)
     while True:
+        ChkSongOver()
         updProgBar(progressbar, tag, elap,tot)
 
 def MainProg():
     root.update()
     if pathtosng == "":
-        OpenFile()
-    file_path = pathtosng
-    filename = Path(file_path).stem
-    print(filename)
-    tag = TinyTag.get(pathtosng, image=True)
-    songtit=tag.title
-    songartist=tag.artist
-    album=tag.album
-    if tag.images.front_cover is None:
-        img=Image.open("fail.png")
-        img.save('cover.png')
+        while True:
+            root.update()
     else:
-        img=tag.images.front_cover
-        imgdat=img.data
-        img2 = Image.open(io.BytesIO(imgdat))
-        img2.save('cover.png')
-    MainProg2()
+        file_path = pathtosng
+        filename = Path(file_path).stem
+        print(filename)
+        print(pathtosng)
+        tag = TinyTag.get(pathtosng, image=True)
+        songtit=tag.title
+        songartist=tag.artist
+        album=tag.album
+        if tag.images.front_cover is None:
+            img=Image.open("fail.png")
+            img.save('cover.png')
+        else:
+            img=tag.images.front_cover
+            imgdat=img.data
+            img2 = Image.open(io.BytesIO(imgdat))
+            img2.save('cover.png')
+        MainProg2()
 
 def ChangeVol(val):
     pygame.mixer_music.set_volume(val/100)
+    voltext.configure(text=math.trunc(val))
 
 songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
 songname.place(relx=0.5, rely=0.665, anchor='c')
@@ -153,11 +189,18 @@ label = tk.CTkLabel(root, image=cover, text="")
 label.place(relx=0.5, rely=0.34, anchor='c')
 button = tk.CTkButton(root, text="⏸", width=30)
 button.place(relx=0.5, rely=0.85, anchor='c')
-button2 = tk.CTkButton(root, text="📁", width=30)
+button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
 button2.place(relx=0.4, rely=0.85, anchor='c')
-button3 = tk.CTkButton(root, text="💿", width=30)
+button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
 button3.place(relx=0.6, rely=0.85, anchor='c')
 slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
-slider.place(relx=0.1, rely=0.5, anchor='e')
+slider.place(relx=0.1, rely=0.4, anchor='c')
+slider.set(pygame.mixer.music.get_volume()*100)
+voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
+voltext.place(relx=0.1, rely=0.65, anchor='c')
+voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
+isEnd = pygame.USEREVENT + 1
+pygame.mixer.music.set_endevent(isEnd)
 MainProg()
+
 #root.mainloop()
