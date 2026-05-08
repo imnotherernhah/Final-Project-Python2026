@@ -9,7 +9,9 @@ import time
 from pathlib import Path
 from tinytag import TinyTag
 from datetime import timedelta
+from pyvidplayer2 import Video
 import os
+import ffmpeg
 
 root = tk.CTk()
 root.title("Music Player")
@@ -22,11 +24,12 @@ pathtoqsng=""
 name=""
 State=0
 inQueue=0
+queue=[]
+mode=0
 
 def ChkSongOver():
     for event in pygame.event.get():
         if event.type == isEnd:
-            print("====END OF SONG====")
             if inQueue==1:
                 MainProg()
 
@@ -58,9 +61,12 @@ def OpenFile2():
 def MainProgAlb():
     global pathtoqsng
     global pathtosng
-    #pygame.mixer.music.queue(pathtoqsng)
-    pathtosng=pathtoqsng
     global inQueue
+    pathtosng=pathtoqsng
+    pygame.mixer.music.queue(pathtoqsng)
+    inQueue=1
+def YesOvr():
+    pathtosng=pathtoqsng
     pygame.mixer.music.queue(pathtoqsng)
     inQueue=1
 
@@ -177,30 +183,31 @@ def MainProg():
 def ChangeVol(val):
     pygame.mixer_music.set_volume(val/100)
     voltext.configure(text=math.trunc(val))
+if mode==0:
+    songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
+    songname.place(relx=0.5, rely=0.665, anchor='c')
+    songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
+    songart.place(relx=0.5, rely=0.715, anchor='c')
+    songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
+    songal.place(relx=0.5, rely=0.76, anchor='c')
+    cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
+    label = tk.CTkLabel(root, image=cover, text="")
+    label.place(relx=0.5, rely=0.34, anchor='c')
+    button = tk.CTkButton(root, text="⏸", width=30)
+    button.place(relx=0.5, rely=0.85, anchor='c')
+    button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
+    button2.place(relx=0.4, rely=0.85, anchor='c')
+    button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
+    button3.place(relx=0.6, rely=0.85, anchor='c')
+    slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
+    slider.place(relx=0.1, rely=0.4, anchor='c')
+    slider.set(pygame.mixer.music.get_volume()*100)
+    voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
+    voltext.place(relx=0.1, rely=0.65, anchor='c')
+    voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
+    isEnd = pygame.USEREVENT + 1
+    pygame.mixer.music.set_endevent(isEnd)
+    MainProg()
+else:
+    Video("video.mp4").preview()
 
-songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
-songname.place(relx=0.5, rely=0.665, anchor='c')
-songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
-songart.place(relx=0.5, rely=0.715, anchor='c')
-songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
-songal.place(relx=0.5, rely=0.76, anchor='c')
-cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
-label = tk.CTkLabel(root, image=cover, text="")
-label.place(relx=0.5, rely=0.34, anchor='c')
-button = tk.CTkButton(root, text="⏸", width=30)
-button.place(relx=0.5, rely=0.85, anchor='c')
-button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
-button2.place(relx=0.4, rely=0.85, anchor='c')
-button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
-button3.place(relx=0.6, rely=0.85, anchor='c')
-slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
-slider.place(relx=0.1, rely=0.4, anchor='c')
-slider.set(pygame.mixer.music.get_volume()*100)
-voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
-voltext.place(relx=0.1, rely=0.65, anchor='c')
-voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
-isEnd = pygame.USEREVENT + 1
-pygame.mixer.music.set_endevent(isEnd)
-MainProg()
-
-#root.mainloop()
