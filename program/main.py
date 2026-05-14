@@ -9,8 +9,9 @@ import time
 from pathlib import Path
 from tinytag import TinyTag
 from datetime import timedelta
-from pyvidplayer2 import Video, VideoPlayer
+from pyvidplayer2 import Video, VideoPlayer, VideoTkinter
 import os
+import sys
 
 root = tk.CTk()
 root.title("Music Player")
@@ -24,7 +25,7 @@ name=""
 State=0
 inQueue=0
 queue=[]
-mode=1
+mode=0
 
 def ChkSongOver():
     for event in pygame.event.get():
@@ -182,71 +183,28 @@ def MainProg():
 def ChangeVol(val):
     pygame.mixer_music.set_volume(val/100)
     voltext.configure(text=math.trunc(val))
-if mode==0:
-    songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
-    songname.place(relx=0.5, rely=0.665, anchor='c')
-    songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
-    songart.place(relx=0.5, rely=0.715, anchor='c')
-    songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
-    songal.place(relx=0.5, rely=0.76, anchor='c')
-    cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
-    label = tk.CTkLabel(root, image=cover, text="")
-    label.place(relx=0.5, rely=0.34, anchor='c')
-    button = tk.CTkButton(root, text="⏸", width=30)
-    button.place(relx=0.5, rely=0.85, anchor='c')
-    button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
-    button2.place(relx=0.4, rely=0.85, anchor='c')
-    button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
-    button3.place(relx=0.6, rely=0.85, anchor='c')
-    slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
-    slider.place(relx=0.1, rely=0.4, anchor='c')
-    slider.set(pygame.mixer.music.get_volume()*100)
-    voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
-    voltext.place(relx=0.1, rely=0.65, anchor='c')
-    voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
-    isEnd = pygame.USEREVENT + 1
-    pygame.mixer.music.set_endevent(isEnd)
-    MainProg()
-else:
-    vid=Video("video.mp4")
-    player = VideoPlayer(vid, (0, 0, *vid.original_size), interactable=True)
-    player.font_size = 50
-    win = pygame.display.set_mode(vid.original_size, pygame.RESIZABLE)
-    pygame.display.set_caption(vid.name)
-    while True:
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                # 4. close when done, also closing the video inside
-                player.close()
-                pygame.quit()
-                exit()
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                # can toggle between zoom to fill and whole video
-                player.toggle_zoom()
-            elif event.type == pygame.VIDEORESIZE:
-                # vide player will always ensure that none of the video is cut off after resizing
-                player.resize(win.get_size())
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                vid.restart()  # Rewind video to beginning
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-                vid.toggle_pause()  # Pause/play video
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
-                vid.toggle_mute()  # Mute/unmute video
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                vid.seek(15)  # Skip 15 seconds in video
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                vid.seek(-15)  # Rewind 15 seconds in video
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                vid.set_volume(vid.get_volume()+0.1)  # Max volume
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                vid.set_volume(vid.get_volume()-0.1)  # Min volume
-        win.fill("white")
 
-        # 2. update video player with events list
-        player.update(events)
-        # 3. draw video player
-        player.draw(win)
-
-        pygame.display.update()
-
+songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
+songname.place(relx=0.5, rely=0.665, anchor='c')
+songart = tk.CTkLabel(root, text="No Artist", font=("Arial", 15))
+songart.place(relx=0.5, rely=0.715, anchor='c')
+songal = tk.CTkLabel(root, text="No Album", font=("Arial", 17))
+songal.place(relx=0.5, rely=0.76, anchor='c')
+cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("fail.png"), size=(300, 300))
+label = tk.CTkLabel(root, image=cover, text="")
+label.place(relx=0.5, rely=0.34, anchor='c')
+button = tk.CTkButton(root, text="⏸", width=30)
+button.place(relx=0.5, rely=0.85, anchor='c')
+button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
+button2.place(relx=0.4, rely=0.85, anchor='c')
+button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
+button3.place(relx=0.6, rely=0.85, anchor='c')
+slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
+slider.place(relx=0.1, rely=0.4, anchor='c')
+slider.set(pygame.mixer.music.get_volume()*100)
+voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
+voltext.place(relx=0.1, rely=0.65, anchor='c')
+voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
+isEnd = pygame.USEREVENT + 1
+pygame.mixer.music.set_endevent(isEnd)
+MainProg()
