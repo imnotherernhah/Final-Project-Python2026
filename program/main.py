@@ -12,6 +12,17 @@ from datetime import timedelta
 from pyvidplayer2 import Video, VideoPlayer, VideoTkinter
 import os
 import sys
+import requests
+from bs4 import BeautifulSoup
+
+# get abc news request from twitter
+response = requests.get('https://abcnews.go.com/')
+
+# get the html information from the site
+html = requests.get('https://abcnews.go.com/').content
+
+# convert the data to be readable
+soup = BeautifulSoup(html, 'html.parser')
 
 root = tk.CTk()
 root.title("Music Player")
@@ -27,6 +38,34 @@ inQueue=0
 queue=[]
 mode=0
 
+def Scrape():
+    dialog = tk.CTkInputDialog(text="Input a Genius song page url.", title="Input Box")
+    url = dialog.get_input()  # This pauses the app until the user submits
+    response = requests.get(url)
+    html = requests.get(url).content
+    soup = BeautifulSoup(html, 'html.parser')
+    name = soup.find(class_='SongHeader-desktop__HiddenMask-sc-94bfcc83-13 jmFkFj')
+    artist=soup.find(class_='PortalTooltip__Trigger-sc-280e7b8b-1 hUBChA')
+    alb = soup.find('a', href="#primary-album")
+    print(name.text)
+    print(artist.text)
+    print(alb.text)
+    songname.configure(text=name.text)
+    songart.configure(text=artist.text)
+    songal.configure(text=alb.text)
+    images = soup.find_all('img')
+    img = images[1]
+    url=img.attrs['src']
+    response = requests.get(url)
+    filename="cover.png"
+    if response.status_code == 200:
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        cover = tk.CTkImage(light_image=Image.open("cover.png"), dark_image=Image.open("cover.png"), size=(300, 300))
+        label = tk.CTkLabel(root, image=cover, text="")
+        label.place(relx=0.5, rely=0.34, anchor='c')
+    else:
+        print("Failed to retrieve image")
 def ChkSongOver():
     for event in pygame.event.get():
         if event.type == isEnd:
@@ -199,11 +238,13 @@ button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
 button2.place(relx=0.4, rely=0.85, anchor='c')
 button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
 button3.place(relx=0.6, rely=0.85, anchor='c')
+button4 = tk.CTkButton(root, text="🌐", width=30, command=Scrape)
+button4.place(relx=0.1, rely=0.1, anchor='c')
 slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
 slider.place(relx=0.1, rely=0.4, anchor='c')
 slider.set(pygame.mixer.music.get_volume()*100)
 voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
-voltext.place(relx=0.1, rely=0.65, anchor='c')
+voltext.place(relx=0.1, rely=0.62, anchor='c')
 voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
 isEnd = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(isEnd)
