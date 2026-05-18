@@ -9,20 +9,11 @@ import time
 from pathlib import Path
 from tinytag import TinyTag
 from datetime import timedelta
-from pyvidplayer2 import Video, VideoPlayer, VideoTkinter
 import os
 import sys
 import requests
 from bs4 import BeautifulSoup
-
-# get abc news request from twitter
-response = requests.get('https://abcnews.go.com/')
-
-# get the html information from the site
-html = requests.get('https://abcnews.go.com/').content
-
-# convert the data to be readable
-soup = BeautifulSoup(html, 'html.parser')
+import librosa
 
 root = tk.CTk()
 root.title("Music Player")
@@ -39,7 +30,7 @@ queue=[]
 mode=0
 
 def Scrape():
-    dialog = tk.CTkInputDialog(text="Input a Genius song page url.", title="Input Box")
+    dialog = tk.CTkInputDialog(text="Input a valid Genius song page url.", title="Input Box")
     url = dialog.get_input()  # This pauses the app until the user submits
     response = requests.get(url)
     html = requests.get(url).content
@@ -191,6 +182,8 @@ def MainProg2():
     global button
     DisplayGUIButton(button)
     slider.set(pygame.mixer.music.get_volume()*100)
+    global mode
+    mode=0
     while True:
         ChkSongOver()
         updProgBar(progressbar, tag, elap,tot)
