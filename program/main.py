@@ -13,11 +13,12 @@ import os
 import sys
 import requests
 from bs4 import BeautifulSoup
-import librosa
 
+tk.set_default_color_theme("themes/lavender.json")
 root = tk.CTk()
 root.title("Music Player")
 root.geometry("500x500")
+root.iconbitmap("icon.ico")
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 pygame.init()
@@ -28,6 +29,15 @@ State=0
 inQueue=0
 queue=[]
 mode=0
+
+def ChooseTheme():
+    theme = filedialog.askopenfilename(
+        title="Choose a JSON file containing a TKinter theme..",
+        filetypes=(("Supported files (.json)", "*.json;"),
+                   ("All files", "*.*"))
+    )
+    pat = Path(theme)
+    name = pat.name
 
 def Scrape():
     dialog = tk.CTkInputDialog(text="Input a valid Genius song page url.", title="Input Box")
@@ -229,6 +239,8 @@ button = tk.CTkButton(root, text="⏸", width=30)
 button.place(relx=0.5, rely=0.85, anchor='c')
 button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
 button2.place(relx=0.4, rely=0.85, anchor='c')
+button5 = tk.CTkButton(root, text="🎨", width=30, command=ChooseTheme)
+button5.place(relx=0.1, rely=0.9, anchor='c')
 button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
 button3.place(relx=0.6, rely=0.85, anchor='c')
 button4 = tk.CTkButton(root, text="🌐", width=30, command=Scrape)
