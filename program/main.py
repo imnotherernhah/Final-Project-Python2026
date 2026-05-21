@@ -13,8 +13,21 @@ import os
 import sys
 import requests
 from bs4 import BeautifulSoup
+def ChooseTheme():
+    theme = filedialog.askopenfilename(
+        title="Choose a JSON file containing a TKinter theme..",
+        filetypes=(("Supported files (.json)", "*.json;"),
+                   ("All files", "*.*"))
+    )
+    pat = Path(theme)
+    name = pat.name
+    if name:
+        tk.set_default_color_theme(pat)
+    else:
+        print("No theme selected")
 
-tk.set_default_color_theme("themes/lavender.json")
+ChooseTheme()
+
 root = tk.CTk()
 root.title("Music Player")
 root.geometry("500x500")
@@ -29,15 +42,7 @@ State=0
 inQueue=0
 queue=[]
 mode=0
-
-def ChooseTheme():
-    theme = filedialog.askopenfilename(
-        title="Choose a JSON file containing a TKinter theme..",
-        filetypes=(("Supported files (.json)", "*.json;"),
-                   ("All files", "*.*"))
-    )
-    pat = Path(theme)
-    name = pat.name
+theme=0
 
 def Scrape():
     dialog = tk.CTkInputDialog(text="Input a valid Genius song page url.", title="Input Box")
@@ -225,6 +230,20 @@ def MainProg():
 def ChangeVol(val):
     pygame.mixer_music.set_volume(val/100)
     voltext.configure(text=math.trunc(val))
+def LightMode():
+    tk.set_appearance_mode("light")
+    global theme
+    theme=1
+def DarkMode():
+    tk.set_appearance_mode("dark")
+    global theme
+    theme=0
+def ThemeType():
+    global theme
+    if theme==0:
+        LightMode()
+    elif theme==1:
+        DarkMode()
 
 songname = tk.CTkLabel(root, text="No Song", font=("Arial", 20))
 songname.place(relx=0.5, rely=0.665, anchor='c')
@@ -239,7 +258,7 @@ button = tk.CTkButton(root, text="⏸", width=30)
 button.place(relx=0.5, rely=0.85, anchor='c')
 button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
 button2.place(relx=0.4, rely=0.85, anchor='c')
-button5 = tk.CTkButton(root, text="🎨", width=30, command=ChooseTheme)
+button5 = tk.CTkButton(root, text="🔆", width=30, command=ThemeType)
 button5.place(relx=0.1, rely=0.9, anchor='c')
 button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
 button3.place(relx=0.6, rely=0.85, anchor='c')
