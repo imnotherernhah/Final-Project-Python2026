@@ -73,10 +73,16 @@ def Scrape():
     else:
         print("Failed to retrieve image")
 def ChkSongOver():
+    global inQueue
     for event in pygame.event.get():
         if event.type == isEnd:
             if inQueue==1:
                 MainProg()
+                inQueue=0
+            else:
+                updProgBar()
+                print("")
+                return
 
 def OpenFile():
     global pathtosng
@@ -186,7 +192,7 @@ def MainProg2():
     cover = tk.CTkImage(light_image=Image.open("cover.png"), dark_image=Image.open("cover.png"), size=(300, 300))
     label = tk.CTkLabel(root, image=cover, text="")
     label.place(relx=0.5, rely=0.34, anchor='c')
-    progressbar = tk.CTkProgressBar(root, orientation="horizontal",progress_color="purple")
+    progressbar = tk.CTkProgressBar(root, orientation="horizontal")
     progressbar.place(relx=0.5, rely=0.81, anchor='c')
     elap = tk.CTkLabel(root, text="", font=("Arial", 17))
     elap.place(relx=0.17, rely=0.81, anchor='w')
@@ -229,7 +235,7 @@ def MainProg():
 
 def ChangeVol(val):
     pygame.mixer_music.set_volume(val/100)
-    voltext.configure(text=math.trunc(val))
+    voltext.configure(text=str(round(val,1))+"%")
 def LightMode():
     tk.set_appearance_mode("light")
     global theme
@@ -255,21 +261,21 @@ cover = tk.CTkImage(light_image=Image.open("fail.png"), dark_image=Image.open("f
 label = tk.CTkLabel(root, image=cover, text="")
 label.place(relx=0.5, rely=0.34, anchor='c')
 button = tk.CTkButton(root, text="⏸", width=30)
-button.place(relx=0.5, rely=0.85, anchor='c')
+button.place(relx=0.5, rely=0.9, anchor='c')
 button2 = tk.CTkButton(root, text="📁", width=30, command=OpenFile)
-button2.place(relx=0.4, rely=0.85, anchor='c')
+button2.place(relx=0.4, rely=0.9, anchor='c')
 button5 = tk.CTkButton(root, text="🔆", width=30, command=ThemeType)
 button5.place(relx=0.1, rely=0.9, anchor='c')
 button3 = tk.CTkButton(root, text="💿", width=30, command=OpenFile2)
-button3.place(relx=0.6, rely=0.85, anchor='c')
+button3.place(relx=0.6, rely=0.9, anchor='c')
 button4 = tk.CTkButton(root, text="🌐", width=30, command=Scrape)
 button4.place(relx=0.1, rely=0.1, anchor='c')
 slider=tk.CTkSlider(root, from_=0, to=100, command=ChangeVol,orientation='vertical')
-slider.place(relx=0.1, rely=0.4, anchor='c')
+slider.place(relx=0.1, rely=0.37, anchor='c')
 slider.set(pygame.mixer.music.get_volume()*100)
 voltext = tk.CTkLabel(root, text="", font=("Arial", 17))
 voltext.place(relx=0.1, rely=0.62, anchor='c')
-voltext.configure(text=math.trunc(pygame.mixer.music.get_volume()*100))
+voltext.configure(text=str(round(pygame.mixer.music.get_volume()*100,1))+"%")
 isEnd = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(isEnd)
 MainProg()
